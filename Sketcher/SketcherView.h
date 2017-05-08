@@ -3,7 +3,9 @@
 //
 
 #pragma once
-
+#include "atltypes.h"
+#include <memory>
+#include "Element.h"
 
 class CSketcherView : public CView
 {
@@ -40,6 +42,15 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+protected:
+	CPoint m_FirstPoint;
+	CPoint m_SecondPoint;
+	std::shared_ptr<CElement> m_pTempElement;
+	std::shared_ptr<CElement> CreateElement() const;
 };
 
 #ifndef _DEBUG  // debug version in SketcherView.cpp

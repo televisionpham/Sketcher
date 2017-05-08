@@ -182,7 +182,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="Circle.h" />
+    <ClInclude Include="Curve.h" />
+    <ClInclude Include="Element.h" />
+    <ClInclude Include="ElementColor.h" />
+    <ClInclude Include="ElementType.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="Rectangle.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Sketcher.h" />
     <ClInclude Include="SketcherDoc.h" />
@@ -192,7 +199,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp" />
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Curve.cpp" />
+    <ClCompile Include="Element.cpp" />
+    <ClCompile Include="Line.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="Sketcher.cpp" />
     <ClCompile Include="SketcherDoc.cpp" />
     <ClCompile Include="SketcherView.cpp" />
@@ -218,4 +230,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Sketcher.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

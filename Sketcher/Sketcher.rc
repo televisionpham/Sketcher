@@ -99,6 +99,15 @@ BEGIN
     SEPARATOR
     BUTTON      ID_FILE_PRINT
     BUTTON      ID_APP_ABOUT
+    BUTTON      ID_ELEMENT_LINE
+    BUTTON      ID_ELEMENT_RECTANGLE
+    BUTTON      ID_ELEMENT_CIRCLE
+    BUTTON      ID_ELEMENT_CURVE
+    SEPARATOR
+    BUTTON      ID_COLOR_BLACK
+    BUTTON      ID_COLOR_RED
+    BUTTON      ID_COLOR_GREEN
+    BUTTON      ID_COLOR_BLUE
 END
 
 
@@ -419,10 +428,10 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_ELEMENT_LINE         "Draw lines"
-    ID_ELEMENT_RECTANGLE    "Draw rectangles"
-    ID_ELEMENT_CIRCLE       "Draw circles"
-    ID_ELEMENT_CURVE        "Draw curves"
+    ID_ELEMENT_LINE         "\nDraw lines"
+    ID_ELEMENT_RECTANGLE    "\nDraw rectangles"
+    ID_ELEMENT_CIRCLE       "\nDraw circles"
+    ID_ELEMENT_CURVE        "\nDraw curves"
 END
 
 #endif    // English (United States) resources
