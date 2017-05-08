@@ -70,9 +70,9 @@ void CSketcherView::OnDraw(CDC* pDC)
 	{
 		if (pDC->RectVisible(pElement->GetEnclosingRect()))
 		{
-			pElement->Draw(pDC);
+			pElement->Draw(pDC);			
 		}
-	}
+	}	
 }
 
 
@@ -137,7 +137,7 @@ void CSketcherView::OnLButtonUp(UINT nFlags, CPoint point)
 		GetDocument()->AddElement(m_pTempElement);
 		InvalidateRect(&m_pTempElement->GetEnclosingRect());
 		m_pTempElement.reset();
-	}
+	}	
 }
 
 
