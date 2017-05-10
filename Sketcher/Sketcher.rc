@@ -199,6 +199,27 @@ BEGIN
     END
 END
 
+IDR_CONTEXT_MENU MENU
+BEGIN
+    POPUP "element"
+    BEGIN
+        MENUITEM "Move",                        ID_ELEMENT_MOVE
+        MENUITEM "Delete",                      ID_ELEMENT_DELETE
+    END
+    POPUP "no element"
+    BEGIN
+        MENUITEM "Line",                        ID_ELEMENT_LINE
+        MENUITEM "Rectangle",                   ID_ELEMENT_RECTANGLE
+        MENUITEM "Circle",                      ID_ELEMENT_CIRCLE
+        MENUITEM "Curve",                       ID_ELEMENT_CURVE
+        MENUITEM SEPARATOR
+        MENUITEM "Black",                       ID_COLOR_BLACK
+        MENUITEM "Red",                         ID_COLOR_RED
+        MENUITEM "Green",                       ID_COLOR_GREEN
+        MENUITEM "Blue",                        ID_COLOR_BLUE
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

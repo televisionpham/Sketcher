@@ -7,7 +7,7 @@
 #include <memory>
 #include "Element.h"
 
-class CSketcherView : public CView
+class CSketcherView : public CScrollView
 {
 protected: // create from serialization only
 	CSketcherView();
@@ -49,8 +49,21 @@ public:
 protected:
 	CPoint m_FirstPoint;
 	CPoint m_SecondPoint;
+	CPoint m_CursorPos;
+	CPoint m_FirstPos;
+	bool m_MoveMode{ false };
 	std::shared_ptr<CElement> m_pTempElement;
-	std::shared_ptr<CElement> CreateElement() const;
+	std::shared_ptr<CElement> m_pSelected;
+	std::shared_ptr<CElement> CreateElement() const;		
+	void MoveElement(CClientDC& aDC, const CPoint& point);
+	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
+public:
+	virtual void OnInitialUpdate();
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
+	afx_msg void OnElementDelete();
+	afx_msg void OnElementMove();
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // debug version in SketcherView.cpp

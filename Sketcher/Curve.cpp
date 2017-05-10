@@ -11,10 +11,10 @@ CCurve::~CCurve()
 {
 }
 
-void CCurve::Draw(CDC * pDC)
+void CCurve::Draw(CDC * pDC, std::shared_ptr<CElement> pElement)
 {
 	CPen aPen;
-	CreatePen(aPen);
+	CreatePen(aPen, pElement);
 	CPen* pOldPen{ pDC->SelectObject(&aPen) };
 	pDC->MoveTo(m_StartPoint);
 	for (const auto& point : m_Points)
@@ -22,6 +22,16 @@ void CCurve::Draw(CDC * pDC)
 		pDC->LineTo(point);
 	}
 	pDC->SelectObject(pOldPen);
+}
+
+void CCurve::Move(const CSize & aSize)
+{
+	m_EnclosingRect += aSize;
+	m_StartPoint += aSize;
+	for (auto& p : m_Points)
+	{
+		p += aSize;
+	}
 }
 
 CCurve::CCurve(const CPoint & first, const CPoint & second, COLORREF color):

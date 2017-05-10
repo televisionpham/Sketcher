@@ -263,10 +263,24 @@ void CSketcherDoc::OnUpdateElementCurve(CCmdUI *pCmdUI)
 void CSketcherDoc::AddElement(std::shared_ptr<CElement>& pElement)
 {
 	m_Sketch.push_back(pElement);
+	UpdateAllViews(nullptr, 0, pElement.get());
 }
 
 
 void CSketcherDoc::DeleteElement(std::shared_ptr<CElement>& pElement)
 {
 	m_Sketch.remove(pElement);
+	UpdateAllViews(nullptr, 0, pElement.get());
+}
+
+std::shared_ptr<CElement> CSketcherDoc::FindElement(const CPoint & point) const
+{
+	for (const auto& pElement : m_Sketch)
+	{
+		if (pElement->GetEnclosingRect().PtInRect(point))
+		{
+			return pElement;
+		}
+	}
+	return nullptr;
 }

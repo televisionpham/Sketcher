@@ -77,6 +77,7 @@ protected:
 public:
 	void AddElement(std::shared_ptr<CElement>& pElement);
 	void DeleteElement(std::shared_ptr<CElement>& pElement);
+	std::shared_ptr<CElement> FindElement(const CPoint& point) const;
 public:
 	SketchIterator begin() const { return std::begin(m_Sketch); }
 	SketchIterator end() const { return std::end(m_Sketch); }
