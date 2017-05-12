@@ -51,6 +51,7 @@ protected:
 	CPoint m_SecondPoint;
 	CPoint m_CursorPos;
 	CPoint m_FirstPos;
+	int m_Scale{1};
 	bool m_MoveMode{ false };
 	std::shared_ptr<CElement> m_pTempElement;
 	std::shared_ptr<CElement> m_pSelected;
@@ -64,6 +65,11 @@ public:
 	afx_msg void OnElementMove();
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnElementSendtoback();
+	afx_msg void OnViewScale();
+	virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
+	void ResetScrollSizes();
+	afx_msg void OnUpdateScale(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in SketcherView.cpp

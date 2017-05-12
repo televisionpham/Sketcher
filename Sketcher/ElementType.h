@@ -5,5 +5,6 @@ enum class ElementType
 	LINE,
 	RECTANGLE,
 	CIRCLE,
-	CURVE
+	CURVE,
+	TEXT
 };

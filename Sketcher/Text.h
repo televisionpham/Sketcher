@@ -1,15 +1,15 @@
 #pragma once
 #include "Element.h"
-class CCircle :
+class CText :
 	public CElement
 {
-public:	
-	virtual ~CCircle();
+public:
+	CText(const CPoint& start, const CPoint& end, const CString& aString, COLORREF color);
 	virtual void Draw(CDC* pDC, std::shared_ptr<CElement> pElement = nullptr) override;
 	virtual void Move(const CSize& aSize) override;
-	CCircle(const CPoint& start, const CPoint& end, COLORREF color, int penWidth);
+	virtual ~CText();
 protected:
-	CPoint m_BottomRight;
-	CCircle();
+	CString m_String;
+	CText();
 };
 

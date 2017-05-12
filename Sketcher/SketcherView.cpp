@@ -20,6 +20,9 @@
 #include "Line.h"
 #include "Rectangle.h"
 #include "Circle.h"
+#include "ScaleDialog.h"
+#include "Text.h"
+#include "TextDialog.h"
 
 // CSketcherView
 
@@ -38,6 +41,9 @@ BEGIN_MESSAGE_MAP(CSketcherView, CScrollView)
 	ON_COMMAND(ID_ELEMENT_MOVE, &CSketcherView::OnElementMove)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_RBUTTONUP()
+	ON_COMMAND(ID_ELEMENT_SENDTOBACK, &CSketcherView::OnElementSendtoback)
+	ON_COMMAND(ID_VIEW_SCALE, &CSketcherView::OnViewScale)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_SCALE, &CSketcherView::OnUpdateScale)
 END_MESSAGE_MAP()
 
 // CSketcherView construction/destruction
@@ -46,7 +52,7 @@ CSketcherView::CSketcherView()
 	: m_FirstPoint(0)
 {
 	// TODO: add construction code here
-
+	SetScrollSizes(MM_TEXT, CSize{});
 }
 
 CSketcherView::~CSketcherView()
@@ -129,12 +135,34 @@ void CSketcherView::OnLButtonDown(UINT nFlags, CPoint point)
 	CClientDC aDC{ this };
 	OnPrepareDC(&aDC);
 	aDC.DPtoLP(&point);
+	CSketcherDoc* pDoc{ GetDocument() };
+
 	if (m_MoveMode)
 	{
 		m_MoveMode = false;
 		auto pElement{ m_pSelected };
 		m_pSelected.reset();
 		GetDocument()->UpdateAllViews(nullptr, 0, pElement.get());
+	}
+	else if (pDoc->GetElementType() == ElementType::TEXT)
+	{
+		CTextDialog aDlg;
+		if (aDlg.DoModal() == IDOK)
+		{
+			CSize textExtent{ aDC.GetOutputTextExtent(aDlg.m_TextString) };
+			textExtent.cx *= m_Scale;
+			textExtent.cy *= m_Scale;
+			std::shared_ptr<CElement> pTextElement
+			{
+				std::make_shared<CText>(
+					point,
+					point + textExtent,
+					aDlg.m_TextString,
+					static_cast<COLORREF>(pDoc->GetElementColor()))
+			};
+			pDoc->AddElement(pTextElement);
+			pDoc->UpdateAllViews(nullptr, 0, pTextElement.get());
+		}
 	}
 	else
 	{
@@ -215,16 +243,17 @@ std::shared_ptr<CElement> CSketcherView::CreateElement() const
 	CSketcherDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	COLORREF color{ static_cast<COLORREF>(pDoc->GetElementColor()) };
+	int penWidth{ pDoc->GetPenWidth() };
 	switch (pDoc->GetElementType())
 	{
 	case ElementType::RECTANGLE:
-		return std::make_shared<CRectangle>(m_FirstPoint, m_SecondPoint, color);
+		return std::make_shared<CRectangle>(m_FirstPoint, m_SecondPoint, color, penWidth);
 	case ElementType::CIRCLE:
-		return std::make_shared<CCircle>(m_FirstPoint, m_SecondPoint, color);
+		return std::make_shared<CCircle>(m_FirstPoint, m_SecondPoint, color, penWidth);
 	case ElementType::CURVE:
-		return std::make_shared<CCurve>(m_FirstPoint, m_SecondPoint, color);
+		return std::make_shared<CCurve>(m_FirstPoint, m_SecondPoint, color, penWidth);
 	case ElementType::LINE:
-		return std::make_shared<CLine>(m_FirstPoint, m_SecondPoint, color);
+		return std::make_shared<CLine>(m_FirstPoint, m_SecondPoint, color, penWidth);
 	default:
 		AfxMessageBox(_T("Bad Element code"), MB_OK);
 		AfxAbort();
@@ -239,11 +268,23 @@ void CSketcherView::MoveElement(CClientDC & aDC, const CPoint & point)
 	if (m_pSelected)
 	{
 		auto pDoc{ GetDocument() };
-		pDoc->UpdateAllViews(nullptr, 0, m_pSelected.get());
-		aDC.SetROP2(R2_NOTXORPEN);
-		m_pSelected->Draw(&aDC, m_pSelected);
-		m_pSelected->Move(distance);
-		m_pSelected->Draw(&aDC, m_pSelected);
+		pDoc->UpdateAllViews(nullptr, 0, m_pSelected.get());				
+		if (typeid(*(m_pSelected.get())) == typeid(CText))
+		{
+			CRect oldRect{ m_pSelected->GetEnclosingRect() };
+			aDC.LPtoDP(oldRect);
+			m_pSelected->Move(distance);
+			InvalidateRect(&oldRect);
+			UpdateWindow();
+			m_pSelected->Draw(&aDC, m_pSelected);
+		}
+		else
+		{
+			aDC.SetROP2(R2_NOTXORPEN);
+			m_pSelected->Draw(&aDC, m_pSelected);
+			m_pSelected->Move(distance);
+			m_pSelected->Draw(&aDC, m_pSelected);
+		}
 		pDoc->UpdateAllViews(nullptr, 0, m_pSelected.get());
 	}
 }
@@ -267,11 +308,9 @@ void CSketcherView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 
 
 void CSketcherView::OnInitialUpdate()
-{
+{	
+	ResetScrollSizes();
 	CScrollView::OnInitialUpdate();
-
-	CSize DocSize{ 3000, 3000 };
-	SetScrollSizes(MM_LOENGLISH, DocSize);
 }
 
 
@@ -338,8 +377,8 @@ void CSketcherView::OnRButtonDown(UINT nFlags, CPoint point)
 	if (m_MoveMode)
 	{
 		CClientDC aDC{ this };
-		OnPrepareDC(&aDC);
-		MoveElement(aDC, m_FirstPoint);
+		OnPrepareDC(&aDC);		
+		MoveElement(aDC, m_FirstPos);
 		m_pSelected.reset();
 		GetDocument()->UpdateAllViews(nullptr);
 	}
@@ -356,4 +395,60 @@ void CSketcherView::OnRButtonUp(UINT nFlags, CPoint point)
 	{
 		CScrollView::OnRButtonUp(nFlags, point);
 	}
+}
+
+
+void CSketcherView::OnElementSendtoback()
+{
+	GetDocument()->SendToBack(m_pSelected);
+}
+
+
+void CSketcherView::OnViewScale()
+{
+	CScaleDialog aDlg;
+	aDlg.m_Scale = m_Scale;
+	if (aDlg.DoModal() == IDOK)
+	{
+		m_Scale = aDlg.m_Scale;
+		ResetScrollSizes();
+		InvalidateRect(nullptr);
+	}
+}
+
+
+void CSketcherView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
+{
+	CScrollView::OnPrepareDC(pDC, pInfo);
+	CSketcherDoc* pDoc{ GetDocument() };
+	pDC->SetMapMode(MM_ANISOTROPIC);
+	CSize DocSize{ pDoc->GetDocSize() };
+	pDC->SetWindowExt(DocSize);
+	// Get the number of pixels per inch in x and y
+	int xLogPixels{ pDC->GetDeviceCaps(LOGPIXELSX) };
+	int yLogPixels{ pDC->GetDeviceCaps(LOGPIXELSY) };
+
+	// Calculate the viewport extent in x and y for the current scale
+	int xExtent{ (DocSize.cx*m_Scale*xLogPixels) / 100 };
+	int yExtent{ (DocSize.cy*m_Scale*yLogPixels) / 100 };
+	pDC->SetViewportExt(xExtent, yExtent); // Set viewport extent
+}
+
+
+void CSketcherView::ResetScrollSizes()
+{
+	CClientDC aDC{ this };
+	OnPrepareDC(&aDC);
+	CSize DocSize{ GetDocument()->GetDocSize() };
+	aDC.LPtoDP(&DocSize);
+	SetScrollSizes(MM_TEXT, DocSize);
+}
+
+
+void CSketcherView::OnUpdateScale(CCmdUI *pCmdUI)
+{
+	pCmdUI->Enable();
+	CString scaleStr;
+	scaleStr.Format(_T(" View Scale : %d"), m_Scale);
+	pCmdUI->SetText(scaleStr);
 }

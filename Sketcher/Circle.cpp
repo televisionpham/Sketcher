@@ -30,8 +30,8 @@ void CCircle::Move(const CSize & aSize)
 	m_EnclosingRect += aSize;
 }
 
-CCircle::CCircle(const CPoint & start, const CPoint & end, COLORREF color) :
-	CElement{ start, color }
+CCircle::CCircle(const CPoint & start, const CPoint & end, COLORREF color, int penWidth) :
+	CElement{ start, color, penWidth }
 {
 	long radius{ static_cast<long>(sqrt(
 		static_cast<double>((end.x - start.x) * (end.x - start.x) +
@@ -44,5 +44,7 @@ CCircle::CCircle(const CPoint & start, const CPoint & end, COLORREF color) :
 	m_BottomRight = CPoint{ start.x + radius, start.y + radius };
 	m_EnclosingRect = CRect{ m_StartPoint.x, m_StartPoint.y,
 		m_BottomRight.x, m_BottomRight.y };
-	m_EnclosingRect.InflateRect(m_PenWidth, m_PenWidth);
+
+	int width{ penWidth == 0 ? 1 : penWidth };
+	m_EnclosingRect.InflateRect(width, width);
 }

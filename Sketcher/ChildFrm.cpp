@@ -16,6 +16,7 @@
 IMPLEMENT_DYNCREATE(CChildFrame, CMDIChildWnd)
 
 BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 // CChildFrame construction/destruction
@@ -54,3 +55,16 @@ void CChildFrame::Dump(CDumpContext& dc) const
 #endif //_DEBUG
 
 // CChildFrame message handlers
+
+
+int CChildFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CMDIChildWnd::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  Add your specialized creation code here
+	m_StatusBar.Create(this);
+	static UINT indicators[]{ ID_SEPARATOR, ID_INDICATOR_SCALE };
+	m_StatusBar.SetIndicators(indicators, _countof(indicators));
+	return 0;
+}

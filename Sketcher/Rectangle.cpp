@@ -30,8 +30,8 @@ void CRectangle::Move(const CSize & aSize)
 	m_EnclosingRect += aSize;
 }
 
-CRectangle::CRectangle(const CPoint & start, const CPoint & end, COLORREF color):
-	CElement{start, color}
+CRectangle::CRectangle(const CPoint & start, const CPoint & end, COLORREF color, int penWidth):
+	CElement{start, color, penWidth}
 {
 	m_StartPoint = CPoint{ (std::min)(start.x, end.x), (std::min)(start.y, end.y) };
 	m_BottomRight = CPoint{ (std::max)(start.x, end.x), (std::max)(start.y, end.y) };
@@ -45,5 +45,6 @@ CRectangle::CRectangle(const CPoint & start, const CPoint & end, COLORREF color)
 	}
 
 	m_EnclosingRect = CRect{ m_StartPoint, m_BottomRight };
-	m_EnclosingRect.InflateRect(m_PenWidth, m_PenWidth);
+	int width{ penWidth == 0 ? 1 : penWidth };
+	m_EnclosingRect.InflateRect(width, width);
 }

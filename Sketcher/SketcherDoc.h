@@ -7,6 +7,7 @@
 #include "ElementType.h"
 #include "ElementColor.h"
 #include "Element.h"
+#include "PenDialog.h"
 #include <memory>
 #include <list>
 
@@ -56,6 +57,7 @@ protected:
 public:
 	ElementType GetElementType() const;
 	ElementColor GetElementColor() const;
+	CSize GetDocSize() const { return m_DocSize; }
 	afx_msg void OnColorBlack();
 	afx_msg void OnColorRed();
 	afx_msg void OnColorGreen();
@@ -74,11 +76,18 @@ public:
 	afx_msg void OnUpdateElementCurve(CCmdUI *pCmdUI);
 protected:
 	std::list<std::shared_ptr<CElement>> m_Sketch;
-public:
+	int m_PenWidth{};
+	CSize m_DocSize{ CSize(3000,3000) };
+public:	
 	void AddElement(std::shared_ptr<CElement>& pElement);
 	void DeleteElement(std::shared_ptr<CElement>& pElement);
 	std::shared_ptr<CElement> FindElement(const CPoint& point) const;
+	void SendToBack(std::shared_ptr<CElement>& pElement);
+	int GetPenWidth() const { return m_PenWidth; }
 public:
 	SketchIterator begin() const { return std::begin(m_Sketch); }
 	SketchIterator end() const { return std::end(m_Sketch); }
+	afx_msg void OnPenWidth();
+	afx_msg void OnElementText();
+	afx_msg void OnUpdateElementText(CCmdUI *pCmdUI);
 };

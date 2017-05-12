@@ -38,6 +38,9 @@ BEGIN_MESSAGE_MAP(CSketcherDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_ELEMENT_RECTANGLE, &CSketcherDoc::OnUpdateElementRectangle)
 	ON_UPDATE_COMMAND_UI(ID_ELEMENT_CIRCLE, &CSketcherDoc::OnUpdateElementCircle)
 	ON_UPDATE_COMMAND_UI(ID_ELEMENT_CURVE, &CSketcherDoc::OnUpdateElementCurve)
+	ON_COMMAND(ID_PEN_WIDTH, &CSketcherDoc::OnPenWidth)
+	ON_COMMAND(ID_ELEMENT_TEXT, &CSketcherDoc::OnElementText)
+	ON_UPDATE_COMMAND_UI(ID_ELEMENT_TEXT, &CSketcherDoc::OnUpdateElementText)
 END_MESSAGE_MAP()
 
 
@@ -283,4 +286,36 @@ std::shared_ptr<CElement> CSketcherDoc::FindElement(const CPoint & point) const
 		}
 	}
 	return nullptr;
+}
+
+void CSketcherDoc::SendToBack(std::shared_ptr<CElement>& pElement)
+{
+	if (pElement)
+	{
+		m_Sketch.remove(pElement);
+		m_Sketch.push_back(pElement);
+	}
+}
+
+
+void CSketcherDoc::OnPenWidth()
+{
+	CPenDialog aDlg;
+	aDlg.m_PenWidth = m_PenWidth;
+	if (aDlg.DoModal() == IDOK)
+	{
+		m_PenWidth = aDlg.m_PenWidth;
+	}
+}
+
+
+void CSketcherDoc::OnElementText()
+{
+	m_Element = ElementType::TEXT;
+}
+
+
+void CSketcherDoc::OnUpdateElementText(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(m_Element == ElementType::TEXT);
 }

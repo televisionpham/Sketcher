@@ -28,10 +28,11 @@ void CLine::Move(const CSize & aSize)
 	m_EnclosingRect += aSize;
 }
 
-CLine::CLine(const CPoint & start, const CPoint & end, COLORREF color):
-	CElement { start, color }, m_EndPoint{ end }
+CLine::CLine(const CPoint & start, const CPoint & end, COLORREF color, int penWidth):
+	CElement{ start, color, penWidth }, m_EndPoint{ end }
 {
 	m_EnclosingRect = CRect{ start, end };
 	m_EnclosingRect.NormalizeRect();
-	m_EnclosingRect.InflateRect(m_PenWidth, m_PenWidth);
+	int width{ penWidth == 0 ? 1 : penWidth };
+	m_EnclosingRect.InflateRect(width, width);
 }
