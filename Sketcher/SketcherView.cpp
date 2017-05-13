@@ -142,7 +142,7 @@ void CSketcherView::OnLButtonDown(UINT nFlags, CPoint point)
 		m_MoveMode = false;
 		auto pElement{ m_pSelected };
 		m_pSelected.reset();
-		GetDocument()->UpdateAllViews(nullptr, 0, pElement.get());
+		pDoc->UpdateAllViews(nullptr, 0, pElement.get());
 	}
 	else if (pDoc->GetElementType() == ElementType::TEXT)
 	{
@@ -160,7 +160,7 @@ void CSketcherView::OnLButtonDown(UINT nFlags, CPoint point)
 					aDlg.m_TextString,
 					static_cast<COLORREF>(pDoc->GetElementColor()))
 			};
-			pDoc->AddElement(pTextElement);
+			pDoc->AddElement(pTextElement);			
 			pDoc->UpdateAllViews(nullptr, 0, pTextElement.get());
 		}
 	}

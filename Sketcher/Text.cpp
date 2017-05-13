@@ -7,7 +7,8 @@ CText::CText()
 }
 
 
-CText::CText(const CPoint & start, const CPoint & end, const CString & aString, COLORREF color)
+CText::CText(const CPoint & start, const CPoint & end, const CString & aString, COLORREF color):
+	CElement {start, color}
 {
 	m_String = aString;
 	m_EnclosingRect = CRect{ start, end };
