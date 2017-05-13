@@ -23,6 +23,7 @@
 #include "ScaleDialog.h"
 #include "Text.h"
 #include "TextDialog.h"
+#include "PrintData.h"
 
 // CSketcherView
 
@@ -91,6 +92,24 @@ void CSketcherView::OnDraw(CDC* pDC)
 
 BOOL CSketcherView::OnPreparePrinting(CPrintInfo* pInfo)
 {
+	CPrintData* printData{ new CPrintData };
+	CSketcherDoc* pDoc{ GetDocument() };
+	CRect docExtent{ pDoc->GetDocExtent() };
+	printData->m_DocRefPoint = docExtent.TopLeft();
+	printData->m_DocTitle = pDoc->GetTitle();
+	// Calculate how many printed page widths are required
+	// to accommodate the width of the document
+	printData->m_nWidths = static_cast<UINT>(ceil(
+		static_cast<double>(docExtent.Width()) / printData->printWidth));
+	// Calculate how many printed page lengths are required
+	// to accommodate the document length
+	printData->m_nLengths = static_cast<UINT>(
+		ceil(static_cast<double>(docExtent.Height()) / printData->printLength));
+	// Set the first page number as 1 and
+	// set the last page number as the total number of pages
+	pInfo->SetMinPage(1);
+	pInfo->SetMaxPage(printData->m_nWidths*printData->m_nLengths);
+	pInfo->m_lpUserData = printData; // Store address of PrintData object
 	// default preparation
 	return DoPreparePrinting(pInfo);
 }
@@ -100,9 +119,10 @@ void CSketcherView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 	// TODO: add extra initialization before printing
 }
 
-void CSketcherView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void CSketcherView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* pInfo)
 {
 	// TODO: add cleanup after printing
+	delete static_cast<CPrintData*>(pInfo->m_lpUserData);
 }
 
 
@@ -143,6 +163,7 @@ void CSketcherView::OnLButtonDown(UINT nFlags, CPoint point)
 		auto pElement{ m_pSelected };
 		m_pSelected.reset();
 		pDoc->UpdateAllViews(nullptr, 0, pElement.get());
+		pDoc->SetModifiedFlag();
 	}
 	else if (pDoc->GetElementType() == ElementType::TEXT)
 	{
@@ -429,8 +450,9 @@ void CSketcherView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 	int yLogPixels{ pDC->GetDeviceCaps(LOGPIXELSY) };
 
 	// Calculate the viewport extent in x and y for the current scale
-	int xExtent{ (DocSize.cx*m_Scale*xLogPixels) / 100 };
-	int yExtent{ (DocSize.cy*m_Scale*yLogPixels) / 100 };
+	int scale{ pDC->IsPrinting() ? 1 : m_Scale }; // If we are printing, use scale 1
+	int xExtent{ (DocSize.cx*scale*xLogPixels) / 100 };
+	int yExtent{ (DocSize.cy*scale*yLogPixels) / 100 };
 	pDC->SetViewportExt(xExtent, yExtent); // Set viewport extent
 }
 
@@ -451,4 +473,35 @@ void CSketcherView::OnUpdateScale(CCmdUI *pCmdUI)
 	CString scaleStr;
 	scaleStr.Format(_T(" View Scale : %d"), m_Scale);
 	pCmdUI->SetText(scaleStr);
+}
+
+
+void CSketcherView::OnPrint(CDC* pDC, CPrintInfo* pInfo)
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	//CScrollView::OnPrint(pDC, pInfo);
+	CPrintData* p{ static_cast<CPrintData*>(pInfo->m_lpUserData) };
+	// Output the document filename
+	pDC->SetTextAlign(TA_CENTER); // Center the following text
+	pDC->TextOut(pInfo->m_rectDraw.right / 2, 20, p->m_DocTitle);
+	CString str;
+	str.Format(_T("Page %u"), pInfo->m_nCurPage);
+	pDC->TextOut(pInfo->m_rectDraw.right / 2, pInfo->m_rectDraw.bottom - 20, str);
+	pDC->SetTextAlign(TA_LEFT); // Left justify text
+								// Calculate the origin point for the current page
+	int xOrg{ static_cast<int>(p->m_DocRefPoint.x +
+		p->printWidth*((pInfo->m_nCurPage - 1) % (p->m_nWidths))) };
+	int yOrg{ static_cast<int>(p->m_DocRefPoint.y +
+		p->printLength*((pInfo->m_nCurPage - 1) / (p->m_nWidths))) };
+	// Calculate offsets to center drawing area on page as positive values
+	int xOffset{ static_cast<int>((pInfo->m_rectDraw.right - p->printWidth) / 2) };
+	int yOffset{ static_cast<int>((pInfo->m_rectDraw.bottom - p->printLength) / 2) };
+	// Change window origin to correspond to current page & save old origin
+	CPoint OldOrg{ pDC->SetWindowOrg(xOrg - xOffset, yOrg - yOffset) };
+	// Define a clip rectangle the size of the printed area
+	pDC->IntersectClipRect(xOrg, yOrg, xOrg + p->printWidth, yOrg + p->printLength);
+	OnDraw(pDC); // Draw the whole document
+	pDC->SelectClipRgn(nullptr); // Remove the clip rectangle
+	pDC->SetWindowOrg(OldOrg); // Restore old window origin
 }

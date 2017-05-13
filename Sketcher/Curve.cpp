@@ -2,6 +2,8 @@
 #include "Curve.h"
 #include <algorithm>
 
+IMPLEMENT_SERIAL(CCurve, CElement, VERSION_NUMBER)
+
 CCurve::CCurve()
 {
 }
@@ -56,4 +58,29 @@ void CCurve::AddSegment(const CPoint & point)
 		(std::max)(m_EnclosingRect.right, point.x), (std::max)(m_EnclosingRect.bottom, point.y)
 	};
 	m_EnclosingRect.InflateRect(width, width);
+}
+
+
+void CCurve::Serialize(CArchive& ar)
+{
+	CElement::Serialize(ar);
+	if (ar.IsStoring())
+	{	// storing code
+		ar << m_Points.size();
+		for (const auto& point : m_Points)
+		{
+			ar << point;
+		}
+	}
+	else
+	{	// loading code
+		size_t nPoints{};
+		ar >> nPoints;
+		CPoint point;
+		for (size_t i = 0; i < nPoints; i++)
+		{
+			ar >> point;
+			m_Points.push_back(point);
+		}
+	}
 }

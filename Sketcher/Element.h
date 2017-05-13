@@ -4,10 +4,12 @@
 #include <memory>
 
 static const COLORREF SELECT_COLOR{ RGB(255,0,180) };
+static const UINT VERSION_NUMBER{ 1001 };
 
 class CElement :
 	public CObject
 {
+	DECLARE_SERIAL(CElement)
 public:	
 	virtual ~CElement();
 	virtual void Draw(CDC* pDC, std::shared_ptr<CElement> pElement=nullptr) {}
@@ -22,5 +24,7 @@ protected:
 	CElement();
 	CElement(const CPoint& start, COLORREF color, int penWidth = 1);
 	void CreatePen(CPen& aPen, std::shared_ptr<CElement> pElement=nullptr);
+public:
+	virtual void Serialize(CArchive& ar) override;
 };
 

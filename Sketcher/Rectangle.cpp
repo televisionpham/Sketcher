@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Rectangle.h"
 
+IMPLEMENT_SERIAL(CRectangle, CElement, VERSION_NUMBER)
 
 CRectangle::CRectangle()
 {
@@ -47,4 +48,18 @@ CRectangle::CRectangle(const CPoint & start, const CPoint & end, COLORREF color,
 	m_EnclosingRect = CRect{ m_StartPoint, m_BottomRight };
 	int width{ penWidth == 0 ? 1 : penWidth };
 	m_EnclosingRect.InflateRect(width, width);
+}
+
+
+void CRectangle::Serialize(CArchive& ar)
+{
+	CElement::Serialize(ar);
+	if (ar.IsStoring())
+	{	// storing code
+		ar << m_BottomRight;
+	}
+	else
+	{	// loading code
+		ar >> m_BottomRight;
+	}
 }

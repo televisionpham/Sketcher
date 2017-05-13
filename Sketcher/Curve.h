@@ -4,6 +4,8 @@
 class CCurve :
 	public CElement
 {
+	DECLARE_SERIAL(CCurve);
+
 public:	
 	virtual ~CCurve();
 	virtual void Draw(CDC* pDC, std::shared_ptr<CElement> pElement = nullptr) override;
@@ -13,5 +15,7 @@ public:
 protected:
 	std::vector<CPoint> m_Points;
 	CCurve();
+public:
+	virtual void Serialize(CArchive& ar) override;
 };
 

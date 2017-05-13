@@ -84,6 +84,7 @@ public:
 	std::shared_ptr<CElement> FindElement(const CPoint& point) const;
 	void SendToBack(std::shared_ptr<CElement>& pElement);
 	int GetPenWidth() const { return m_PenWidth; }
+	CRect GetDocExtent() const;
 public:
 	SketchIterator begin() const { return std::begin(m_Sketch); }
 	SketchIterator end() const { return std::end(m_Sketch); }

@@ -70,6 +70,7 @@ public:
 	virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
 	void ResetScrollSizes();
 	afx_msg void OnUpdateScale(CCmdUI *pCmdUI);
+	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
 };
 
 #ifndef _DEBUG  // debug version in SketcherView.cpp

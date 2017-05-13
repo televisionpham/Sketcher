@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Line.h"
 
+IMPLEMENT_SERIAL(CLine, CElement, VERSION_NUMBER)
 
 CLine::CLine()
 {
@@ -35,4 +36,18 @@ CLine::CLine(const CPoint & start, const CPoint & end, COLORREF color, int penWi
 	m_EnclosingRect.NormalizeRect();
 	int width{ penWidth == 0 ? 1 : penWidth };
 	m_EnclosingRect.InflateRect(width, width);
+}
+
+
+void CLine::Serialize(CArchive& ar)
+{
+	CElement::Serialize(ar);
+	if (ar.IsStoring())
+	{	// storing code
+		ar << m_EndPoint;
+	}
+	else
+	{	// loading code
+		ar >> m_EndPoint;
+	}
 }

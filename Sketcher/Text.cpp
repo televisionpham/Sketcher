@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Text.h"
 
+IMPLEMENT_SERIAL(CText, CElement, VERSION_NUMBER)
 
 CText::CText()
 {
@@ -31,4 +32,18 @@ void CText::Move(const CSize & aSize)
 
 CText::~CText()
 {
+}
+
+
+void CText::Serialize(CArchive& ar)
+{
+	CElement::Serialize(ar);
+	if (ar.IsStoring())
+	{	// storing code
+		ar << m_String;
+	}
+	else
+	{	// loading code
+		ar >> m_String;
+	}
 }

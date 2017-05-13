@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Element.h"
 
+IMPLEMENT_SERIAL(CElement, CObject, VERSION_NUMBER)
 
 CElement::CElement()
 	: m_StartPoint {}
@@ -24,4 +25,24 @@ void CElement::CreatePen(CPen & aPen, std::shared_ptr<CElement> pElement)
 
 CElement::~CElement()
 {
+}
+
+
+void CElement::Serialize(CArchive& ar)
+{
+	CObject::Serialize(ar);
+	if (ar.IsStoring())
+	{	// storing code
+		ar << m_StartPoint
+			<< m_PenWidth
+			<< m_Color
+			<< m_EnclosingRect;
+	}
+	else
+	{	// loading code
+		ar >> m_StartPoint
+			>> m_PenWidth
+			>> m_Color
+			>> m_EnclosingRect;
+	}
 }

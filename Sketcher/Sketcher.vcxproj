@@ -190,6 +190,7 @@
     <ClInclude Include="Line.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="PenDialog.h" />
+    <ClInclude Include="PrintData.h" />
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScaleDialog.h" />

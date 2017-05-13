@@ -4,6 +4,7 @@
 class CRectangle :
 	public CElement
 {
+	DECLARE_SERIAL(CRectangle)
 public:	
 	virtual ~CRectangle();
 	virtual void Draw(CDC* pDC, std::shared_ptr<CElement> pElement = nullptr) override;
@@ -12,5 +13,7 @@ public:
 protected:
 	CRectangle();
 	CPoint m_BottomRight;
+public:
+	virtual void Serialize(CArchive& ar) override;
 };
 

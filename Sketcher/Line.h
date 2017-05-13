@@ -3,6 +3,7 @@
 class CLine :
 	public CElement
 {
+	DECLARE_SERIAL(CLine)
 public:	
 	virtual ~CLine();
 	virtual void Draw(CDC* pDC, std::shared_ptr<CElement> pElement = nullptr) override;	
@@ -12,5 +13,7 @@ protected:
 	CPoint m_EndPoint;
 protected:
 	CLine();
+public:
+	virtual void Serialize(CArchive& ar) override;
 };
 

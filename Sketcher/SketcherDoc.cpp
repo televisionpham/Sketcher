@@ -77,11 +77,36 @@ void CSketcherDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
-		// TODO: add storing code here
+		ar << static_cast<COLORREF>(m_Color)
+			<< static_cast<int>(m_Element)
+			<< m_PenWidth
+			<< m_DocSize;
+		ar << m_Sketch.size();
+		for (const auto& pElement : m_Sketch)
+		{
+			ar << pElement.get();
+		}
 	}
 	else
 	{
 		// TODO: add loading code here
+		COLORREF color{};
+		int elementType{};
+		ar >> color
+			>> elementType
+			>> m_PenWidth
+			>> m_DocSize;
+		m_Color = static_cast<ElementColor>(color);
+		m_Element = static_cast<ElementType>(elementType);
+
+		size_t elementCount{};
+		ar >> elementCount;
+		CElement* pElement;
+		for (size_t i = 0; i < elementCount; i++)
+		{
+			ar >> pElement;
+			m_Sketch.push_back(std::shared_ptr<CElement>(pElement));
+		}
 	}
 }
 
@@ -170,48 +195,56 @@ ElementColor CSketcherDoc::GetElementColor() const
 void CSketcherDoc::OnColorBlack()
 {
 	m_Color = ElementColor::BLACK;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnColorRed()
 {
 	m_Color = ElementColor::RED;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnColorGreen()
 {
 	m_Color = ElementColor::GREEN;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnColorBlue()
 {
 	m_Color = ElementColor::BLUE;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnElementLine()
 {
 	m_Element = ElementType::LINE;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnElementRectangle()
 {
 	m_Element = ElementType::RECTANGLE;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnElementCircle()
 {
 	m_Element = ElementType::CIRCLE;
+	SetModifiedFlag();
 }
 
 
 void CSketcherDoc::OnElementCurve()
 {
 	m_Element = ElementType::CURVE;
+	SetModifiedFlag();
 }
 
 
@@ -267,6 +300,7 @@ void CSketcherDoc::AddElement(std::shared_ptr<CElement>& pElement)
 {
 	m_Sketch.push_back(pElement);
 	UpdateAllViews(nullptr, 0, pElement.get());
+	SetModifiedFlag();
 }
 
 
@@ -274,6 +308,7 @@ void CSketcherDoc::DeleteElement(std::shared_ptr<CElement>& pElement)
 {
 	m_Sketch.remove(pElement);
 	UpdateAllViews(nullptr, 0, pElement.get());
+	SetModifiedFlag();
 }
 
 std::shared_ptr<CElement> CSketcherDoc::FindElement(const CPoint & point) const
@@ -294,7 +329,23 @@ void CSketcherDoc::SendToBack(std::shared_ptr<CElement>& pElement)
 	{
 		m_Sketch.remove(pElement);
 		m_Sketch.push_back(pElement);
+		SetModifiedFlag();
 	}
+}
+
+CRect CSketcherDoc::GetDocExtent() const
+{
+	if (m_Sketch.empty())
+	{
+		return CRect{ 0,0,1,1 };
+	}
+	CRect docExtent{ m_Sketch.front()->GetEnclosingRect() };
+	for (auto& pElement : m_Sketch)
+	{
+		docExtent.UnionRect(docExtent, pElement->GetEnclosingRect());
+	}
+	docExtent.NormalizeRect();
+	return docExtent;
 }
 
 
@@ -305,6 +356,7 @@ void CSketcherDoc::OnPenWidth()
 	if (aDlg.DoModal() == IDOK)
 	{
 		m_PenWidth = aDlg.m_PenWidth;
+		SetModifiedFlag();
 	}
 }
 
@@ -312,6 +364,7 @@ void CSketcherDoc::OnPenWidth()
 void CSketcherDoc::OnElementText()
 {
 	m_Element = ElementType::TEXT;
+	SetModifiedFlag();
 }
 
 
